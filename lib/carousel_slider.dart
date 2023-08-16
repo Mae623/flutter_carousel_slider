@@ -35,10 +35,14 @@ class CarouselSlider extends StatefulWidget {
 
   final int? itemCount;
 
+  /// 当用户切换日期时，需要reset idx
+  final bool? resetIdx;
+
   CarouselSlider(
       {required this.items,
       required this.options,
       this.disableGesture,
+      this.resetIdx,
       CarouselController? carouselController,
       Key? key})
       : itemBuilder = null,
@@ -54,6 +58,7 @@ class CarouselSlider extends StatefulWidget {
       required this.itemBuilder,
       required this.options,
       this.disableGesture,
+      this.resetIdx,
       CarouselController? carouselController,
       Key? key})
       : items = null,
@@ -100,7 +105,9 @@ class CarouselSliderState extends State<CarouselSlider>
 
     // handle autoplay when state changes
     handleAutoPlay();
-
+    if (widget.resetIdx ?? false) {
+      _index = 10000;
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -298,6 +305,9 @@ class CarouselSliderState extends State<CarouselSlider>
     clearTimer();
   }
 
+  int _scrollBase = 10000;
+  int _index = 10000;
+
   @override
   Widget build(BuildContext context) {
     return getGestureWrapper(PageView.builder(
@@ -319,16 +329,21 @@ class CarouselSliderState extends State<CarouselSlider>
       itemCount: widget.options.enableInfiniteScroll ? null : widget.itemCount,
       key: widget.options.pageViewKey,
       onPageChanged: (int index) {
-        int currentPage = getRealIndex(index + carouselState!.initialPage,
+        /// 只有划动时执行
+        if (index != _scrollBase) {
+          _index += index - _scrollBase;
+          _scrollBase = index;
+        }
+        int currentPage = getRealIndex(_index + carouselState!.initialPage,
             carouselState!.realPage, widget.itemCount);
         if (widget.options.onPageChanged != null) {
           widget.options.onPageChanged!(currentPage, mode);
         }
       },
       itemBuilder: (BuildContext context, int idx) {
-        final int index = getRealIndex(idx + carouselState!.initialPage,
+        /// 划动和切换日期时都执行
+        final int index = getRealIndex(_index + carouselState!.initialPage,
             carouselState!.realPage, widget.itemCount);
-
         return AnimatedBuilder(
           animation: carouselState!.pageController!,
           child: (widget.items != null)
@@ -339,7 +354,7 @@ class CarouselSliderState extends State<CarouselSlider>
             // if `enlargeCenterPage` is true, we must calculate the carousel item's height
             // to display the visual effect
             double itemOffset = 0;
-            if (widget.options.enlargeCenterPage != null &&
+            /*   if (widget.options.enlargeCenterPage != null &&
                 widget.options.enlargeCenterPage == true) {
               // pageController.page can only be accessed after the first build,
               // so in the first build we calculate the itemoffset manually
@@ -371,7 +386,7 @@ class CarouselSliderState extends State<CarouselSlider>
                   (1 - (itemOffset.abs() * enlargeFactor)).clamp(0.0, 1.0);
               distortionValue =
                   Curves.easeOut.transform(distortionRatio as double);
-            }
+            }*/
 
             final double height = widget.options.height ??
                 MediaQuery.of(context).size.width *
