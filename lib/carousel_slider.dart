@@ -1,16 +1,14 @@
 library carousel_slider;
 
-import 'dart:async';
-
 import 'package:carousel_slider/carousel_state.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'carousel_controller.dart';
+import 'custom_carousel_controller.dart';
 import 'carousel_options.dart';
 import 'utils.dart';
 
-export 'carousel_controller.dart';
+export 'custom_carousel_controller.dart';
 export 'carousel_options.dart';
 
 typedef Widget ExtendedIndexedWidgetBuilder(
@@ -39,13 +37,13 @@ class CarouselSlider extends StatefulWidget {
       {required this.items,
       required this.options,
       this.disableGesture,
-      CarouselController? carouselController,
+      CustomCarouselController? carouselController,
       Key? key})
       : itemBuilder = null,
         itemCount = items != null ? items.length : 0,
         _carouselController = carouselController != null
             ? carouselController as CarouselControllerImpl
-            : CarouselController() as CarouselControllerImpl,
+            : CustomCarouselController() as CarouselControllerImpl,
         super(key: key);
 
   /// The on demand item builder constructor
@@ -54,12 +52,12 @@ class CarouselSlider extends StatefulWidget {
       required this.itemBuilder,
       required this.options,
       this.disableGesture,
-      CarouselController? carouselController,
+      CustomCarouselController? carouselController,
       Key? key})
       : items = null,
         _carouselController = carouselController != null
             ? carouselController as CarouselControllerImpl
-            : CarouselController() as CarouselControllerImpl,
+            : CustomCarouselController() as CarouselControllerImpl,
         super(key: key);
 
   @override
